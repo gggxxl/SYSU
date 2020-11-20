@@ -1,0 +1,30 @@
+//
+syntax = "proto3";
+
+service Pubsub {
+    // 发布主题消息
+    rpc publish(publishRequest) returns (reply) {}
+    // 浏览主题
+    rpc browse(browseRequest) returns (stream reply) {}
+    // 订阅主题
+    rpc subcribe(subRequest) returns (stream reply) {}
+}
+
+message publishRequest {
+    string topic = 1;
+    string context = 2;
+}
+
+message reply {
+    string message = 1;
+}
+
+message browseRequest {
+    string topic = 1;
+}
+
+message subRequest {
+    string topic = 1;  // 主题
+    string clientId = 2;  // 客户端ID
+    int32 TTL = 3;  // 订阅有效期
+}
