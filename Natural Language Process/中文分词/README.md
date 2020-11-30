@@ -35,13 +35,17 @@ Requirement：`gensim`、`pytorch`、`numpy`、`tqdm`、`argparse`、`matplotlib
 
   `python main.py --pretrain='' --fix_embedding=False`
 
+即可开始训练、同时每一个epoch测试一次（使用GPU，大概10分钟一次）
+
 其他参数见`utils_args.py`
 
 
 
-运行`utils_evaluate.py`，使用保存的最佳模型（如果有）对测试集进行分词，产生分词文件
+调试用：
 
-运行`utils_draw.py`，对记录的结果进行绘制（如果有）
+- 运行`utils_evaluate.py`，使用保存的最佳模型（如果有，请保存为./save/model_debug）对测试集进行分词，产生分词文件；通过调整注释掉的代码也可以对分词文件直接进行测试，详见代码。
 
-运行`utils_other.py`，使用简单例子对相关算法（batch化）进行debug
+- 运行`utils_draw.py`，对记录的结果进行绘制（如果有）
+
+- 运行`utils_other.py`，使用简单例子对相关算法（batch化）进行debug
 
