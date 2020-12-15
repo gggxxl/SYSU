@@ -119,6 +119,40 @@ def evaluate(device, model, testSet, running_id, save=False):
 #
 #         return precision, recall, f1
 
+def mysplit(device, model, w2idx, source_file, running_id):
+    testSet = MSRDataSet(data_path=source_file, w2idx=w2idx)
+    model.eval()
+    s_res = []
+    with torch.no_grad():
+        loader_dict = dict(shuffle=False, batch_size=args.batch_size, pin_memory=True, num_workers=4,
+                           collate_fn=collate_fn)
+        test_loader = DataLoader(testSet, **loader_dict)
+        for pack in tqdm(test_loader):
+            pad_seq = pack[0].to(device).long()
+            lens = pack[2]
+            best_labels = model(pad_seq, lens)
+            for c, l in zip(best_labels, lens):
+                cs, _ = label2split(c, l)
+                s_res.append(cs[:])
+        res = []
+        with open(source_file, "r", encoding="utf-8") as source:
+            i = 0
+            for line in source.readlines():
+                line_split = line.split()
+                line = ""
+                for ls in line_split:  # 去掉分词的空格
+                    line += ls
+                if len(line) == 0:
+                    continue
+                res_i = ""
+                for s in s_res[i]:  # 根据模型的分词产生空格
+                    res_i += line[s[0]: s[1]+1] + "  "
+                res.append(res_i)
+                i += 1
+            with open('./save/' + running_id + "_split_res.txt",
+                      'a+', encoding='utf-8') as target:
+                for r in res:
+                    target.write(r + '\n')
 
 if __name__ == "__main__":
     from utils_model import BiLSTM_CRF
@@ -129,7 +163,6 @@ if __name__ == "__main__":
     w2idx, pretrain_embedding = train_embedding(train_w2v())
     model = BiLSTM_CRF(device, pretrain_embedding).to(device).double()
     model.load_state_dict(torch.load("./save/model_debug"))
-    testingSet = MSRDataSet(data_path=args.test_set, w2idx=w2idx)
-    evaluate(device, model, testingSet, 'debug', save=True)
+    mysplit(device, model, w2idx, './dataset/msr_training.txt', 'next')
     #cmp_set = MSRDataSet(data_path="./pretrain/cmp_res2", w2idx=w2idx)
     #evaluate(device, model, testingSet, 'debug', cmp_set)
